@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Object Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-10 text-center">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Live Object Detection</h2>
+        <p class="text-gray-600 mb-4">Tracking objects in real-time using your browser camera and YOLOv5.</p>
+
+        <!-- Video Container -->
+        <div class="flex justify-center">
+            <video id="video" autoplay class="border rounded shadow-lg w-1/2"></video>
+        </div>
+
+        <!-- Processed Feed -->
+        <div class="mt-6">
+            <img id="processed-frame" class="mx-auto border rounded shadow-lg w-1/2">
+        </div>
+
+        <!-- Back to Dashboard -->
+        <div class="mt-6">
+            <a href="/dashboard" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- JavaScript to Capture and Send Frames -->
+    <script>
+        const video = document.getElementById("video");
+        const processedFrame = document.getElementById("processed-frame");
+
+        // Access browser camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error("Error accessing camera:", error);
+            });
+
+        // Capture and send frames every 100ms
+        function sendFrame() {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append("video_frame", blob, "frame.jpg");
+
+                fetch("http://127.0.0.1:9001/process_frame", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    processedFrame.src = URL.createObjectURL(blob);
+                })
+                .catch(error => console.error("Error processing frame:", error));
+            }, "image/jpeg");
+
+            setTimeout(sendFrame, 100); // Send frame every 100ms
+        }
+
+        video.addEventListener("play", () => {
+            sendFrame();
+        });
+    </script>
+</body>
+</html>

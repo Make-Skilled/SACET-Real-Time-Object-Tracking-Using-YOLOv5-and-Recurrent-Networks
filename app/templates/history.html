@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detection History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-10 text-center">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Detection History</h2>
+        <p class="text-gray-600 mb-4">View past object detections.</p>
+
+        <!-- Search & Filter Form -->
+        <form method="GET" action="{{ url_for('history') }}" class="mb-6 flex flex-wrap justify-center space-x-4">
+            <div>
+                <label class="text-gray-700">Start Date:</label>
+                <input type="date" name="start_date" value="{{ start_date }}" class="p-2 border rounded">
+            </div>
+            <div>
+                <label class="text-gray-700">End Date:</label>
+                <input type="date" name="end_date" value="{{ end_date }}" class="p-2 border rounded">
+            </div>
+            <div>
+                <label class="text-gray-700">Search Object:</label>
+                <input type="text" name="search_object" placeholder="e.g. person, car" value="{{ search_object }}" class="p-2 border rounded">
+            </div>
+            <button type="submit" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Filter
+            </button>
+        </form>
+
+        <!-- Object Tags -->
+        {% if unique_objects %}
+        <div class="flex flex-wrap justify-center mb-6">
+            <span class="text-gray-700 font-semibold mr-2">Filter by Objects:</span>
+            {% for obj in unique_objects %}
+                <a href="{{ url_for('history', search_object=obj) }}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 mx-1 mb-2">
+                    {{ obj }}
+                </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if detections.items %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for detection in detections.items %}
+            <div class="bg-white p-4 rounded-lg shadow-md text-center">
+                <p class="text-gray-700 font-medium mb-2">{{ detection.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+                <h4 class="text-lg font-semibold">Detected Objects</h4>
+                {% if detection.detected_objects %}
+                    <p class="text-gray-500 mb-2">{{ detection.detected_objects }}</p>
+                {% else %}
+                    <p class="text-gray-500 mb-2 italic">No objects detected</p>
+                {% endif %}
+
+                <h4 class="text-lg font-semibold">Original Image</h4>
+                <img src="{{ url_for('uploaded_file', filename=detection.image_filename) }}" class="mx-auto border rounded shadow-lg w-3/4 mb-3">
+
+                <h4 class="text-lg font-semibold">Processed Image</h4>
+                <img src="{{ url_for('uploaded_file', filename=detection.detected_filename) }}" class="mx-auto border rounded shadow-lg w-3/4">
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="mt-6 flex justify-center space-x-4">
+            {% if detections.has_prev %}
+            <a href="{{ url_for('history', page=detections.prev_num, start_date=start_date, end_date=end_date, search_object=search_object) }}" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Previous
+            </a>
+            {% endif %}
+
+            {% if detections.has_next %}
+            <a href="{{ url_for('history', page=detections.next_num, start_date=start_date, end_date=end_date, search_object=search_object) }}" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Next
+            </a>
+            {% endif %}
+        </div>
+
+        {% else %}
+        <p class="text-gray-600">No detections found for the selected date or object.</p>
+        {% endif %}
+
+        <!-- Back to Dashboard -->
+        <div class="mt-6">
+            <a href="/dashboard" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

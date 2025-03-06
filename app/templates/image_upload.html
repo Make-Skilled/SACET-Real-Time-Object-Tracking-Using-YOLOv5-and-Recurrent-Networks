@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image for Object Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto mt-10 text-center">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Upload Image for Object Detection</h2>
+        <p class="text-gray-600 mb-4">Select an image to detect objects using YOLOv5.</p>
+
+        <!-- Upload Form -->
+        <form id="upload-form" enctype="multipart/form-data" class="mb-6">
+            <input type="file" id="image-input" accept="image/*" class="mb-4 p-2 border rounded">
+            <button type="submit" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Upload & Detect
+            </button>
+        </form>
+
+        <!-- Display Uploaded Image -->
+        <h3 class="text-lg font-semibold mt-4">Uploaded Image:</h3>
+        <img id="original-image" class="mx-auto border rounded shadow-lg w-1/2 hidden">
+
+        <!-- Display Processed Image -->
+        <h3 class="text-lg font-semibold mt-4">Detected Objects:</h3>
+        <img id="processed-image" class="mx-auto border rounded shadow-lg w-1/2 hidden">
+
+        <!-- Back to Dashboard -->
+        <div class="mt-6">
+            <a href="/dashboard" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- JavaScript to Handle Image Upload -->
+    <script>
+        const form = document.getElementById("upload-form");
+        const imageInput = document.getElementById("image-input");
+        const originalImage = document.getElementById("original-image");
+        const processedImage = document.getElementById("processed-image");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const file = imageInput.files[0];
+            if (!file) {
+                alert("Please select an image to upload.");
+                return;
+            }
+
+            // Display original image
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImage.src = e.target.result;
+                originalImage.classList.remove("hidden");
+            };
+            reader.readAsDataURL(file);
+
+            // Upload image for processing
+            const formData = new FormData();
+            formData.append("image", file);
+
+            const response = await fetch("http://127.0.0.1:9001/process_image", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const imageBlob = await response.blob();
+                const imageUrl = URL.createObjectURL(imageBlob);
+                processedImage.src = imageUrl;
+                processedImage.classList.remove("hidden");
+            } else {
+                alert("Error processing image.");
+            }
+        });
+    </script>
+</body>
+</html>

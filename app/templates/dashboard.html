@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body class="bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Object Tracking Dashboard</h1>
+            <ul class="flex space-x-6">
+                <li><a href="/live_feed" class="hover:underline">Live Camera Feed</a></li>
+                <li><a href="/image_upload" class="hover:underline">Upload Image</a></li>
+                <li><a href="/history" class="hover:underline">History</a></li>
+                <li><a href="/logout" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Profile Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <h3 class="text-xl font-semibold mb-4">User Profile</h3>
+            <p class="text-gray-700 font-medium">Welcome, <span id="username">{{username}}</span>!</p>
+            <p class="text-gray-500 text-sm">Tracking System User</p>
+        </div>
+
+        <!-- Detection Summary -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-center col-span-2">
+            <h3 class="text-xl font-semibold mb-4">Detection Summary</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-200 p-4 rounded-lg">
+                    <h4 class="text-lg font-bold">Total Detections</h4>
+                    <p id="total-detections" class="text-3xl text-blue-600 font-bold">Loading...</p>
+                </div>
+                <div class="bg-gray-200 p-4 rounded-lg">
+                    <h4 class="text-lg font-bold">Objects Detected</h4>
+                    <p id="total-objects" class="text-3xl text-green-600 font-bold">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            
+        <!-- Detection Trend Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-4">Detections Over Time</h3>
+            <div class="relative w-full" style="height: 400px;">  <!-- Fixed height -->
+                <canvas id="detectionTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Object Breakdown Pie Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-4">Object Detection Breakdown</h3>
+            <div class="relative w-full" style="height: 400px;">  <!-- Fixed height -->
+                <canvas id="objectBreakdownChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Action Cards -->
+    <div class="container mx-auto mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Live Camera Feed -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <h3 class="text-xl font-semibold mb-4">Live Camera Feed</h3>
+            <p class="text-gray-600 mb-4">Track objects in real-time using your camera.</p>
+            <a href="/live_feed" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">Start Live Feed</a>
+        </div>
+
+        <!-- Upload Image -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <h3 class="text-xl font-semibold mb-4">Upload Image</h3>
+            <p class="text-gray-600 mb-4">Upload an image for object detection.</p>
+            <a href="/image_upload" class="bg-purple-500 text-white px-6 py-2 rounded hover:bg-purple-600">Upload Image</a>
+        </div>
+
+        <!-- History -->
+        <div class="bg-white p-6 rounded-lg shadow-md text-center">
+            <h3 class="text-xl font-semibold mb-4">Detection History</h3>
+            <p class="text-gray-600 mb-4">View past detections and results.</p>
+            <a href="/history" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">View History</a>
+        </div>
+    </div>
+
+    <!-- COCO Dataset Object List -->
+    <div class="container mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-center mb-4">Objects That Can Be Detected</h3>
+        <p class="text-gray-600 text-center mb-4">Using the COCO dataset, our model can detect the following 80 objects:</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-gray-700 text-center">
+            <span class="bg-gray-200 p-2 rounded">Person</span>
+            <span class="bg-gray-200 p-2 rounded">Bicycle</span>
+            <span class="bg-gray-200 p-2 rounded">Car</span>
+            <span class="bg-gray-200 p-2 rounded">Motorcycle</span>
+            <span class="bg-gray-200 p-2 rounded">Airplane</span>
+            <span class="bg-gray-200 p-2 rounded">Bus</span>
+            <span class="bg-gray-200 p-2 rounded">Train</span>
+            <span class="bg-gray-200 p-2 rounded">Truck</span>
+            <span class="bg-gray-200 p-2 rounded">Boat</span>
+            <span class="bg-gray-200 p-2 rounded">Traffic Light</span>
+            <span class="bg-gray-200 p-2 rounded">Fire Hydrant</span>
+            <span class="bg-gray-200 p-2 rounded">Stop Sign</span>
+            <span class="bg-gray-200 p-2 rounded">Parking Meter</span>
+            <span class="bg-gray-200 p-2 rounded">Bench</span>
+            <span class="bg-gray-200 p-2 rounded">Bird</span>
+            <span class="bg-gray-200 p-2 rounded">Cat</span>
+            <span class="bg-gray-200 p-2 rounded">Dog</span>
+            <span class="bg-gray-200 p-2 rounded">Horse</span>
+            <span class="bg-gray-200 p-2 rounded">Sheep</span>
+            <span class="bg-gray-200 p-2 rounded">Cow</span>
+            <span class="bg-gray-200 p-2 rounded">Elephant</span>
+            <span class="bg-gray-200 p-2 rounded">Bear</span>
+            <span class="bg-gray-200 p-2 rounded">Zebra</span>
+            <span class="bg-gray-200 p-2 rounded">Giraffe</span>
+            <span class="bg-gray-200 p-2 rounded">Backpack</span>
+            <span class="bg-gray-200 p-2 rounded">Umbrella</span>
+            <span class="bg-gray-200 p-2 rounded">Handbag</span>
+            <span class="bg-gray-200 p-2 rounded">Tie</span>
+            <span class="bg-gray-200 p-2 rounded">Suitcase</span>
+            <span class="bg-gray-200 p-2 rounded">Frisbee</span>
+            <span class="bg-gray-200 p-2 rounded">Skis</span>
+            <span class="bg-gray-200 p-2 rounded">Snowboard</span>
+            <span class="bg-gray-200 p-2 rounded">Sports Ball</span>
+            <span class="bg-gray-200 p-2 rounded">Kite</span>
+            <span class="bg-gray-200 p-2 rounded">Baseball Bat</span>
+            <span class="bg-gray-200 p-2 rounded">Baseball Glove</span>
+            <span class="bg-gray-200 p-2 rounded">Skateboard</span>
+            <span class="bg-gray-200 p-2 rounded">Surfboard</span>
+            <span class="bg-gray-200 p-2 rounded">Tennis Racket</span>
+            <span class="bg-gray-200 p-2 rounded">Bottle</span>
+            <span class="bg-gray-200 p-2 rounded">Wine Glass</span>
+            <span class="bg-gray-200 p-2 rounded">Cup</span>
+            <span class="bg-gray-200 p-2 rounded">Fork</span>
+            <span class="bg-gray-200 p-2 rounded">Knife</span>
+            <span class="bg-gray-200 p-2 rounded">Spoon</span>
+            <span class="bg-gray-200 p-2 rounded">Bowl</span>
+            <span class="bg-gray-200 p-2 rounded">Banana</span>
+            <span class="bg-gray-200 p-2 rounded">Apple</span>
+            <span class="bg-gray-200 p-2 rounded">Sandwich</span>
+            <span class="bg-gray-200 p-2 rounded">Orange</span>
+            <span class="bg-gray-200 p-2 rounded">Broccoli</span>
+            <span class="bg-gray-200 p-2 rounded">Carrot</span>
+            <span class="bg-gray-200 p-2 rounded">Hot Dog</span>
+            <span class="bg-gray-200 p-2 rounded">Pizza</span>
+            <span class="bg-gray-200 p-2 rounded">Donut</span>
+            <span class="bg-gray-200 p-2 rounded">Cake</span>
+            <span class="bg-gray-200 p-2 rounded">Chair</span>
+            <span class="bg-gray-200 p-2 rounded">Couch</span>
+            <span class="bg-gray-200 p-2 rounded">Potted Plant</span>
+            <span class="bg-gray-200 p-2 rounded">Bed</span>
+            <span class="bg-gray-200 p-2 rounded">Dining Table</span>
+            <span class="bg-gray-200 p-2 rounded">Toilet</span>
+            <span class="bg-gray-200 p-2 rounded">TV</span>
+            <span class="bg-gray-200 p-2 rounded">Laptop</span>
+            <span class="bg-gray-200 p-2 rounded">Mouse</span>
+            <span class="bg-gray-200 p-2 rounded">Remote</span>
+            <span class="bg-gray-200 p-2 rounded">Keyboard</span>
+            <span class="bg-gray-200 p-2 rounded">Cell Phone</span>
+            <span class="bg-gray-200 p-2 rounded">Microwave</span>
+            <span class="bg-gray-200 p-2 rounded">Oven</span>
+            <span class="bg-gray-200 p-2 rounded">Toaster</span>
+            <span class="bg-gray-200 p-2 rounded">Sink</span>
+            <span class="bg-gray-200 p-2 rounded">Refrigerator</span>
+            <span class="bg-gray-200 p-2 rounded">Book</span>
+            <span class="bg-gray-200 p-2 rounded">Clock</span>
+            <span class="bg-gray-200 p-2 rounded">Vase</span>
+            <span class="bg-gray-200 p-2 rounded">Scissors</span>
+            <span class="bg-gray-200 p-2 rounded">Teddy Bear</span>
+            <span class="bg-gray-200 p-2 rounded">Hair Drier</span>
+            <span class="bg-gray-200 p-2 rounded">Toothbrush</span>
+        </div>
+    </div>
+
+    <script>
+        async function fetchDetectionSummary() {
+            try {
+                const response = await fetch('/detection_summary');
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error("Error fetching summary:", data.error);
+                } else {
+                    document.getElementById("total-detections").textContent = data.total_detections;
+                    document.getElementById("total-objects").textContent = data.total_objects;
+                }
+            } catch (error) {
+                console.error("Failed to fetch detection summary:", error);
+            }
+        }
+
+        async function fetchDetectionTrend() {
+            try {
+                const response = await fetch('/detection_trend');
+                const data = await response.json();
+
+                const ctx = document.getElementById('detectionTrendChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            label: 'Detections Per Day',
+                            data: data.counts,
+                            borderColor: 'blue',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to fetch detection trend:", error);
+            }
+        }
+
+        async function fetchObjectBreakdown() {
+            try {
+                const response = await fetch('/object_breakdown');
+                const data = await response.json();
+
+                const ctx = document.getElementById('objectBreakdownChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.objects,
+                        datasets: [{
+                            label: 'Objects Detected',
+                            data: data.counts,
+                            backgroundColor: [
+                                'red', 'blue', 'green', 'yellow', 'purple', 'orange'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to fetch object breakdown:", error);
+            }
+        }
+
+        // Fetch data when the page loads
+        fetchDetectionSummary();
+        fetchDetectionTrend();
+        fetchObjectBreakdown();
+    </script>
+
+
+</body>
+</html>
